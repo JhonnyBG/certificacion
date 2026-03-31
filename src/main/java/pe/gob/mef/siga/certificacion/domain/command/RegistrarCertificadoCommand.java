@@ -17,5 +17,7 @@ public class RegistrarCertificadoCommand {
   Integer tipoCertificado;
   
   String tipoOperacion;
+  
+  Long certificado;
 
 }
