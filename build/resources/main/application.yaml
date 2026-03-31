@@ -3,7 +3,7 @@ server:
     context-path: /v1/siga-services/certificacion
 spring:
   application:
-    name: areausuaria
+    name: certificacion
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@//10.5.115.190:1521/desamef19c
