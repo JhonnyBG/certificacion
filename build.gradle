@@ -1,0 +1,113 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.13'
+    id 'io.spring.dependency-management' version '1.1.7'
+    
+    // Cobertura
+    id 'jacoco'
+
+    // SonarQube
+    id 'org.sonarqube' version '6.1.0.5360'
+}
+
+group = 'pe.gob.mef.siga.certificacion'
+version = '0.0.1-SNAPSHOT'
+description = 'Certificacion'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Lombok primero
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Binding entre Lombok y MapStruct
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+    // MapStruct 1.6.x compatible con Spring Boot 4
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation platform("com.oracle.database.jdbc:ojdbc-bom:21.9.0.0")
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+sourceSets{
+    generado {
+        java {
+            srcDirs = ['src/generado/java']
+        }
+    }
+}
+
+compileJava {
+  options.annotationProcessorPath = configurations.annotationProcessor
+  options.generatedSourceOutputDirectory = file("src/generado/java")
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true   // Necesario para SonarQube
+        html.required = true
+    }
+}
+
+//configuracion del Sonar Local
+sonarqube {
+	properties {
+		// Identidad del Proyecto
+		property 'sonar.projectName', 'certificacion'
+		property 'sonar.projectKey', 'fN4rzr1Guq32YmV6'
+		property 'sonar.organization', 'Ministerio de Economía y Finanzas'
+		property 'sonar.projectDescription', 'BackEnd: Area Usuaria'
+		property 'sonar.projectVersion', '1.0.0'
+		
+		// Servidor SonarQube
+		property 'sonar.host.url', 'http://localhost:9000'
+		property 'sonar.token', System.getenv('SONAR_TOKEN_LOCAL')
+		property 'sonar.plugins.downloadOnlyRequired', 'true'
+		
+		// Configuración Java
+		property 'sonar.java.source', 17
+		property 'sonar.java.target', 17
+		property 'sonar.java.enablePreview', 'false'
+		
+		// Código fuente y pruebas
+		property 'sonar.sources', 'src/main/java'
+		property 'sonar.tests', 'src/test/java'
+		property 'sonar.java.binaries', 'build/classes/java/main'
+		
+		// Encoding
+		property 'sonar.sourceEncoding', 'UTF-8'
+		property 'encoding', 'UTF-8'
+		property 'charSet', 'UTF-8'
+	}
+}
